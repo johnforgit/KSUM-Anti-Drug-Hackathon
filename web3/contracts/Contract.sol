@@ -29,6 +29,8 @@ contract SoberHaven {
     uint256 public postCount = 0;
     address[] public police = [0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,0x92d480746e1309a33800A3772b7544cba61ca994,0x936F3348c3035ea5530F0d959272DC6cC0402C44,0x23f4B503f36efe37dc754512c3C9d7Ef61c99371];
     address[] public admin = [0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,0xB9eF15e56A39fAc2a66431d88c7ef950652e6560,0x936F3348c3035ea5530F0d959272DC6cC0402C44,0x23f4B503f36efe37dc754512c3C9d7Ef61c99371];
+
+// function to create a post that reports an incident
 function createPost(address _owner , string memory _title, string memory _description, string memory _location , string memory _image, uint256 _time ) public returns(uint256){
     Post storage post = posts[postCount];
     require( post.eventTime <= block.timestamp, "Time must be lesser  than current time");
@@ -46,12 +48,14 @@ function createPost(address _owner , string memory _title, string memory _descri
     post.rejected =false;
     return postCount -1;
 
-
+// function to send ethereum to a contract that has reported an incident
 }
 function sendETHtoContract(uint amount) public payable{
     (bool sent, ) = (address(this)).call{value: amount}("");
         require(sent, "Failed to send Ether");
 }
+
+// function to get posts from the website
 function getPosts() public view returns(Post[] memory){
     Post[] memory allPosts = new Post[](postCount);
    for(uint i=0 ; i<postCount ; i++){
@@ -59,6 +63,8 @@ function getPosts() public view returns(Post[] memory){
         allPosts[i] = item;
    }
    return allPosts;
+
+// function to update the public view. After the post has been updated it will be visible to the public
 }
 function updatePublicView( uint256 _id ) public returns  (bool) {
     //require(msg.sender == police, "Only police can update the view");
@@ -70,17 +76,16 @@ function updatePublicView( uint256 _id ) public returns  (bool) {
             return true;
         }
     }
-
-   
-    
     return false;
 }
 
+// function to transfer eth
 function transfer(address payable to , uint256 amount)public payable{
       (bool sent, ) = to.call{value: amount}("");
         require(sent, "Failed to send Ether");
 }
 
+// function to update the police view
 function updatePoliceView( uint256 _id ) public returns (bool) {
     //require(msg.sender == police, "Only police can update the view");
     for(uint i=0 ; i<admin.length ; i++){
@@ -91,10 +96,10 @@ function updatePoliceView( uint256 _id ) public returns (bool) {
             return true;
         }
     }
-   
-    
     return false;
 }
+
+// function to upvote the post. More upvoting means the post is valid
 function upvotePost( uint256 _id ) public payable returns (bool) {
     require( msg.value > 0.00001 ether, "Amount must be greater than 0.00001");
    uint256 amount = msg.value;
@@ -107,11 +112,9 @@ function upvotePost( uint256 _id ) public payable returns (bool) {
          return true;
    }
    return false;
-
-    
-
-    
 }
+
+// Function to reject an invalid/fake post
 function rejectPost( uint256 _id ) public returns (bool) {
     //require(msg.sender == police, "Only police can update the view");
     for(uint i=0 ; i<admin.length ; i++){
